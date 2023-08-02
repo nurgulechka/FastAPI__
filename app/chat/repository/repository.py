@@ -23,6 +23,7 @@ class ChatRepository:
         os.getenv("OPENAI_API_KEY")
         embeddings = OpenAIEmbeddings()
         db = Chroma(embedding_function=embeddings, persist_directory="app/database")
+        db.persist()
         llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k", temperature=0.0)
         chain = load_qa_chain(llm=llm, chain_type="stuff")
         docs = db.similarity_search(user_question)

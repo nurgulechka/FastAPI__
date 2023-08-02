@@ -10,12 +10,8 @@ from fastapi import Depends
 from langchain.chains.question_answering import load_qa_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
-from langchain.prompts import (
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-    PromptTemplate,
-    SystemMessagePromptTemplate,
-)
+from langchain.prompts import (ChatPromptTemplate, HumanMessagePromptTemplate,
+                               PromptTemplate, SystemMessagePromptTemplate)
 from pydantic import Field
 
 from ..adapters.jwt_service import JWTData
@@ -34,9 +30,9 @@ class GetResponse(AppModel):
     response: str
 
 
-@router.post("/")
+@router.post("/Chat")
 def get_response(
     input: GetUserRequest,
     svc: Service = Depends(get_service),
-) -> str:
-    return svc.repository.get_response(input.request)
+) -> dict[str, str]:
+    return GetResponse(response=svc.repository.get_response(input.request))

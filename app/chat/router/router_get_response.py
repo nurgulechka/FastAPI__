@@ -34,9 +34,9 @@ class GetResponse(AppModel):
     response: str
 
 
-@router.post("/Chat", response_model=GetResponse)
+@router.post("/Chat")
 def get_response(
     input: GetUserRequest,
     svc: Service = Depends(get_service),
-) -> dict[str, str]:
-    return GetResponse(svc.repository.get_response(input.request))
+):
+    return svc.repository.get_response(input.request)

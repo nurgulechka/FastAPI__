@@ -34,7 +34,7 @@ class GetResponse(AppModel):
     response: str
 
 
-@router.post("/chats")
+@router.post("/")
 def get_response(
     input: GetUserRequest,
     svc: Service = Depends(get_service),

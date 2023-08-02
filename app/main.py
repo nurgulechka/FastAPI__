@@ -22,4 +22,4 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
-app.include_router(chat_router, prefix="/chats", tags=["Chat"])
+app.include_router(chat_router, prefix="", tags=["Chat"])

@@ -35,13 +35,13 @@ class ChatRepository:
             embeddings=embeddings,
         )
         llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k", temperature=0.0)
-        # chain = load_qa_chain(llm=llm, chain_type="stuff")
-        # docs = db.similarity_search(user_question)
-        qa = RetrievalQA.from_chain_type(
-            llm=llm, chain_type="refine", retriever=vector_store.as_retriever()
-        )
-
-        return qa.run(user_question)
+        chain = load_qa_chain(llm=llm, chain_type="refine")
+        docs = vector_store.similarity_search(user_question)
+        # qa = RetrievalQA.from_chain_type(
+        #     llm=llm, chain_type="map_reduce", retriever=vector_store.as_retriever()
+        # )
+        return chain.run({"input_documents": docs, "question": user_question})
+        # return qa.run(user_question)
         # payload = {
         #     "email": user["email"],
         #     "password": hash_password(user["password"]),

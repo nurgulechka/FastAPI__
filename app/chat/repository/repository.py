@@ -2,12 +2,14 @@ import os
 from datetime import datetime
 from typing import Optional
 
+import qdrant_client
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
+from langchain.chains import RetrievalQA
 from langchain.chains.question_answering import load_qa_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
+from langchain.vectorstores import Chroma, Qdrant
 from pymongo.database import Database
 
 from ..utils.security import hash_password
@@ -20,14 +22,26 @@ class ChatRepository:
         self.database = database
 
     def get_response(self, user_question: str):
+        client = qdrant_client.QdrantClient(
+            os.getenv("QDRANT_HOST"), api_key=os.getenv("QDRANT_API_KEY")
+        )
         os.getenv("OPENAI_API_KEY")
         embeddings = OpenAIEmbeddings()
-        db = Chroma(embedding_function=embeddings, persist_directory="app/database")
-        db.persist()
+        # db = Chroma(embedding_function=embeddings, persist_directory="app/database")
+        # db.persist()
+        vector_store = Qdrant(
+            client=client,
+            collection_name="civil-main",
+            embeddings=embeddings,
+        )
         llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k", temperature=0.0)
-        chain = load_qa_chain(llm=llm, chain_type="stuff")
-        docs = db.similarity_search(user_question)
-        return chain.run({"input_documents": docs, "question": user_question})
+        # chain = load_qa_chain(llm=llm, chain_type="stuff")
+        # docs = db.similarity_search(user_question)
+        qa = RetrievalQA.from_chain_type(
+            llm=llm, chain_type="refine", retriever=vector_store.as_retriever()
+        )
+
+        return qa.run(user_question)
         # payload = {
         #     "email": user["email"],
         #     "password": hash_password(user["password"]),
